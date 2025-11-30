@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { CertificateData } from '../types/certificate.types';
 import { certificateAPI } from '../services/api';
 
+// Lista de tipos de discapacidad disponibles
 const disabilityTypes = [
   { value: 'cognitiva', label: 'Cognitiva' },
   { value: 'fisica', label: 'Física' },
@@ -10,6 +11,7 @@ const disabilityTypes = [
   { value: 'multiple', label: 'Múltiple' }
 ];
 
+// Lista de ayudas a la movilidad que puede seleccionar el usuario
 const mobilityAidsOptions = [
   'Silla de ruedas',
   'Bastón',
@@ -22,11 +24,19 @@ const mobilityAidsOptions = [
 ];
 
 export const CreateCertificate: React.FC = () => {
+  // Estado de carga mientras se envía a blockchain
   const [loading, setLoading] = useState(false);
+  
+  // Resultado exitoso: txid y mensaje de confirmación
   const [result, setResult] = useState<{ txid: string; message: string } | null>(null);
+  
+  // Mensaje de error si algo falla
   const [error, setError] = useState<string | null>(null);
+  
+  // Mostrar/ocultar sección de contacto de emergencia
   const [showEmergencyContact, setShowEmergencyContact] = useState(false);
 
+  // Estado del formulario principal con datos del certificado
   const [formData, setFormData] = useState<CertificateData>({
     firstName: '',
     lastName: '',
@@ -39,21 +49,25 @@ export const CreateCertificate: React.FC = () => {
     specialNeeds: ''
   });
 
+  // Estado del contacto de emergencia (opcional)
   const [emergencyContact, setEmergencyContact] = useState({
     name: '',
     phone: '',
     relationship: ''
   });
 
+  // Manejar cambios en inputs de texto, número y select
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value, type } = e.target;
     
     if (type === 'number') {
+      // Convertir a número si es input numérico
       setFormData({
         ...formData,
         [name]: parseInt(value, 10)
       });
     } else {
+      // Mantener como string para otros tipos
       setFormData({
         ...formData,
         [name]: value
@@ -61,11 +75,12 @@ export const CreateCertificate: React.FC = () => {
     }
   };
 
+  // Alternar selección de ayudas a la movilidad (checkboxes)
   const handleMobilityAidToggle = (aid: string) => {
     const currentAids = formData.mobilityAids || [];
     const newAids = currentAids.includes(aid)
-      ? currentAids.filter(a => a !== aid)
-      : [...currentAids, aid];
+      ? currentAids.filter(a => a !== aid)  // Deseleccionar si ya está marcado
+      : [...currentAids, aid];  // Agregar si no está marcado
     
     setFormData({
       ...formData,
@@ -73,6 +88,7 @@ export const CreateCertificate: React.FC = () => {
     });
   };
 
+  // Manejar cambios en inputs del contacto de emergencia
   const handleEmergencyContactChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setEmergencyContact({
       ...emergencyContact,
@@ -80,6 +96,7 @@ export const CreateCertificate: React.FC = () => {
     });
   };
 
+  // Enviar formulario: cifrar, guardar en blockchain y mostrar txid
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
@@ -87,18 +104,20 @@ export const CreateCertificate: React.FC = () => {
     setLoading(true);
 
     try {
+      // Combinar datos del formulario con contacto de emergencia si está habilitado
       const certificateData = {
         ...formData,
         emergencyContact: showEmergencyContact && emergencyContact.name ? emergencyContact : undefined
       };
 
+      // Enviar al backend (API llama a blockchain)
       const response = await certificateAPI.create(certificateData);
       setResult({
         txid: response.txid,
         message: response.message,
       });
       
-      // Limpiar formulario
+      // Limpiar formulario después de éxito
       setFormData({
         firstName: '',
         lastName: '',
@@ -113,12 +132,14 @@ export const CreateCertificate: React.FC = () => {
       setEmergencyContact({ name: '', phone: '', relationship: '' });
       setShowEmergencyContact(false);
     } catch (err: any) {
+      // Capturar y mostrar error
       setError(err.error || 'Error al crear el certificado');
     } finally {
       setLoading(false);
     }
   };
 
+  // Copiar ID de transacción al portapapeles del usuario
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text).then(() => {
       alert('ID de transacción copiado al portapapeles');
@@ -127,15 +148,19 @@ export const CreateCertificate: React.FC = () => {
 
   return (
     <div className="max-w-3xl mx-auto p-6">
+      {/* Encabezado */}
       <h1 className="text-3xl font-bold mb-2">Certificado de Discapacidad</h1>
       <p className="text-gray-600 mb-6">Almacenamiento seguro en blockchain BSV</p>
 
+      {/* Formulario principal */}
       <form onSubmit={handleSubmit} className="space-y-6 bg-white p-6 rounded-lg shadow">
-        {/* Datos Personales */}
+        
+        {/* SECCIÓN 1: Datos Personales */}
         <div className="border-b pb-6">
           <h2 className="text-xl font-semibold mb-4">Datos Personales</h2>
           
           <div className="grid grid-cols-2 gap-4">
+            {/* Campo: Nombre */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Nombre *
@@ -150,6 +175,7 @@ export const CreateCertificate: React.FC = () => {
               />
             </div>
             
+            {/* Campo: Apellidos */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Apellidos *
@@ -166,6 +192,7 @@ export const CreateCertificate: React.FC = () => {
           </div>
 
           <div className="grid grid-cols-2 gap-4 mt-4">
+            {/* Campo: DNI/NIE */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 DNI/NIE *
@@ -181,6 +208,7 @@ export const CreateCertificate: React.FC = () => {
               />
             </div>
 
+            {/* Campo: Teléfono */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Teléfono *
@@ -198,11 +226,12 @@ export const CreateCertificate: React.FC = () => {
           </div>
         </div>
 
-        {/* Datos de Discapacidad */}
+        {/* SECCIÓN 2: Información de Discapacidad */}
         <div className="border-b pb-6">
           <h2 className="text-xl font-semibold mb-4">Información de Discapacidad</h2>
           
           <div className="grid grid-cols-2 gap-4">
+            {/* Campo: Tipo de Discapacidad */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Tipo de Discapacidad *
@@ -222,6 +251,7 @@ export const CreateCertificate: React.FC = () => {
               </select>
             </div>
 
+            {/* Campo: Porcentaje de Discapacidad */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Porcentaje de Discapacidad (%) *
@@ -239,6 +269,7 @@ export const CreateCertificate: React.FC = () => {
             </div>
           </div>
 
+          {/* Campo: Descripción detallada */}
           <div className="mt-4">
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Descripción de la Discapacidad *
@@ -255,9 +286,10 @@ export const CreateCertificate: React.FC = () => {
           </div>
         </div>
 
-        {/* Ayudas a la Movilidad */}
+        {/* SECCIÓN 3: Ayudas a la Movilidad */}
         <div className="border-b pb-6">
           <h2 className="text-xl font-semibold mb-4">Ayudas a la Movilidad</h2>
+          {/* Checkboxes para seleccionar múltiples ayudas */}
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
             {mobilityAidsOptions.map(aid => (
               <label key={aid} className="flex items-center">
@@ -273,7 +305,7 @@ export const CreateCertificate: React.FC = () => {
           </div>
         </div>
 
-        {/* Necesidades Especiales */}
+        {/* SECCIÓN 4: Necesidades Especiales */}
         <div className="border-b pb-6">
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Necesidades Especiales
@@ -288,8 +320,9 @@ export const CreateCertificate: React.FC = () => {
           />
         </div>
 
-        {/* Contacto de Emergencia */}
+        {/* SECCIÓN 5: Contacto de Emergencia (Opcional) */}
         <div>
+          {/* Checkbox para mostrar/ocultar sección */}
           <div className="flex items-center mb-4">
             <input
               type="checkbox"
@@ -303,8 +336,10 @@ export const CreateCertificate: React.FC = () => {
             </label>
           </div>
           
+          {/* Mostrar campos de contacto de emergencia si está habilitado */}
           {showEmergencyContact && (
             <div className="grid grid-cols-3 gap-4 p-4 bg-gray-50 rounded-md">
+              {/* Nombre del contacto */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Nombre
@@ -317,6 +352,7 @@ export const CreateCertificate: React.FC = () => {
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
+              {/* Teléfono del contacto */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Teléfono
@@ -329,6 +365,7 @@ export const CreateCertificate: React.FC = () => {
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
+              {/* Relación con el usuario */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Relación
@@ -346,6 +383,7 @@ export const CreateCertificate: React.FC = () => {
           )}
         </div>
 
+        {/* Botón de envío */}
         <button
           type="submit"
           disabled={loading}
@@ -359,12 +397,14 @@ export const CreateCertificate: React.FC = () => {
         </button>
       </form>
 
+      {/* MENSAJE DE ERROR */}
       {error && (
         <div className="mt-4 p-4 bg-red-50 border border-red-300 rounded-md">
           <p className="text-red-800">{error}</p>
         </div>
       )}
 
+      {/* MENSAJE DE ÉXITO con ID de transacción */}
       {result && (
         <div className="mt-4 p-6 bg-green-50 border border-green-300 rounded-md">
           <h3 className="font-bold text-green-800 text-xl mb-3">
@@ -372,12 +412,14 @@ export const CreateCertificate: React.FC = () => {
           </h3>
           <p className="text-gray-700 mb-4">{result.message}</p>
           
+          {/* Box con ID de transacción */}
           <div className="bg-white p-4 rounded border border-gray-300">
             <p className="text-sm text-gray-600 mb-2">ID de la Transacción:</p>
             <div className="flex items-center">
               <code className="flex-1 text-sm font-mono text-gray-800 break-all">
                 {result.txid}
               </code>
+              {/* Botón para copiar txid */}
               <button
                 onClick={() => copyToClipboard(result.txid)}
                 className="ml-2 px-3 py-1 text-sm bg-blue-100 text-blue-700 rounded hover:bg-blue-200"
@@ -387,6 +429,7 @@ export const CreateCertificate: React.FC = () => {
             </div>
           </div>
           
+          {/* Aviso importante */}
           <p className="text-sm text-gray-600 mt-3">
             ⚠️ <strong>IMPORTANTE:</strong> Guarde este ID para recuperar el certificado en el futuro.
           </p>
