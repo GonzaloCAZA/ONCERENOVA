@@ -135,52 +135,74 @@ class BlockchainService {
     const scriptHex: string = certOut.scriptPubKey.hex.toLowerCase();
     // script = [PUSHDATA opcode][len][payload]
 
-    let cursor = 0;
-    const opcode = parseInt(scriptHex.slice(cursor, cursor + 2), 16);
-    cursor += 2;
+    // Inicializar cursor en 0 para leer el script hexadecimal byte a byte
+let cursor = 0;
 
-    let dataLen: number;
-    if (opcode >= 1 && opcode <= 75) {
-      dataLen = opcode;
-    } else if (opcode === 0x4c) {
-      dataLen = parseInt(scriptHex.slice(cursor, cursor + 2), 16);
-      cursor += 2;
-    } else if (opcode === 0x4d) {
-      const le = scriptHex.slice(cursor, cursor + 4);
-      dataLen = parseInt(le.slice(2, 4) + le.slice(0, 2), 16); // LE → BE
-      cursor += 4;
-    } else if (opcode === 0x4e) {
-      const le = scriptHex.slice(cursor, cursor + 8);
-      dataLen = parseInt(
-        le.slice(6, 8) + le.slice(4, 6) + le.slice(2, 4) + le.slice(0, 2),
-        16
-      );
-      cursor += 8;
-    } else {
-      throw new Error('Unsupported script format for certificate output');
-    }
+// Leer el primer byte (opcode) que indica cómo interpretar la longitud de datos
+const opcode = parseInt(scriptHex.slice(cursor, cursor + 2), 16);
+cursor += 2;
 
-    const payloadHex = scriptHex.slice(cursor, cursor + dataLen * 2);
-    const payloadBuf = Buffer.from(payloadHex, 'hex');
-    const fullStr = payloadBuf.toString('utf8');
+// Variable para almacenar la longitud de los datos a extraer
+let dataLen: number;
 
-    const prefix = 'disabd';
-    const idx = fullStr.indexOf(prefix);
-    if (idx === -1) {
-      throw new Error('Certificate prefix not found or corrupted');
-    }
+// Interpretar la longitud según el opcode Bitcoin (PUSHDATA opcodes)
+if (opcode >= 1 && opcode <= 75) {
+  // Opcode directo: el valor del opcode ES la longitud de datos
+  dataLen = opcode;
+} else if (opcode === 0x4c) {
+  // OP_PUSHDATA1: siguiente 1 byte indica longitud
+  dataLen = parseInt(scriptHex.slice(cursor, cursor + 2), 16);
+  cursor += 2;
+} else if (opcode === 0x4d) {
+  // OP_PUSHDATA2: siguiente 2 bytes (little-endian) indican longitud
+  const le = scriptHex.slice(cursor, cursor + 4);
+  dataLen = parseInt(le.slice(2, 4) + le.slice(0, 2), 16); // Convertir LE → BE
+  cursor += 4;
+} else if (opcode === 0x4e) {
+  // OP_PUSHDATA4: siguiente 4 bytes (little-endian) indican longitud
+  const le = scriptHex.slice(cursor, cursor + 8);
+  dataLen = parseInt(
+    le.slice(6, 8) + le.slice(4, 6) + le.slice(2, 4) + le.slice(0, 2),
+    16
+  ); // Convertir LE → BE
+  cursor += 8;
+} else {
+  throw new Error('Unsupported script format for certificate output');
+}
 
-    const jsonStr = fullStr.substring(idx + prefix.length);
-    const obj = JSON.parse(jsonStr);
+// Extraer el payload hexadecimal (dataLen bytes = dataLen * 2 caracteres hex)
+const payloadHex = scriptHex.slice(cursor, cursor + dataLen * 2);
 
-    const cert = (obj.encrypted) ? obj.encrypted : obj;
+// Convertir hexadecimal a Buffer y luego a string UTF-8
+const payloadBuf = Buffer.from(payloadHex, 'hex');
+const fullStr = payloadBuf.toString('utf8');
 
-    console.log(cert);
-    if (!isValidEncryptedCertificate(cert)) {
-      throw new Error('Decrypted data does not match EncryptedCertificate shape');
-    }
+// Buscar el prefijo "disabd" que marca el inicio del JSON
+const prefix = 'disabd';
+const idx = fullStr.indexOf(prefix);
+if (idx === -1) {
+  throw new Error('Certificate prefix not found or corrupted');
+}
 
-    return cert;
+// Extraer la parte JSON (todo después del prefijo)
+const jsonStr = fullStr.substring(idx + prefix.length);
+
+// Parsear el JSON para obtener el objeto
+const obj = JSON.parse(jsonStr);
+
+// Extraer el certificado cifrado (puede estar anidado en obj.encrypted)
+const cert = (obj.encrypted) ? obj.encrypted : obj;
+
+// Log para debugging
+console.log(cert);
+
+// Validar que el objeto tenga la estructura correcta de EncryptedCertificate
+if (!isValidEncryptedCertificate(cert)) {
+  throw new Error('Decrypted data does not match EncryptedCertificate shape');
+}
+
+// Retornar el certificado cifrado extraído
+return cert;
   } catch (error: any) {
     console.error('❌ Retrieval error:', error);
     throw new Error(`Failed to retrieve certificate: ${error.message}`);

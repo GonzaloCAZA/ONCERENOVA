@@ -10,6 +10,6 @@ if (!process.env.BSV_PRIVATE_KEY) {
 }
 
 export const bsvConfig = {
-  network: 'mainnet', // Siempre mainnet
+  network: 'mainnet', // Siempre mainnet 
   privateKey: PrivateKey.fromWif(process.env.BSV_PRIVATE_KEY)
 };

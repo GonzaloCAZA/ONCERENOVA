@@ -1,3 +1,5 @@
+//Aun no esta implentado
+
 import * as fs from "fs";
 import PDFDocument = require("pdfkit");
 
