@@ -103,12 +103,3 @@ Asegúrate de tener BSV en tu dirección para pagar las transacciones (mínimo ~
 Ver transacciones en WhatsOnChain:
 - `https://whatsonchain.com/tx/{txid}`
 
-## ⚡ Optimización para Hackathon
-
-- Storage local simple (JSON)
-- Sin autenticación (agregar en producción)
-- Transacciones directas sin cola
-- UI minimalista pero funcional
-
----
-**Desarrollado para BSV Hackathon** | Mainnet Ready | Windows Compatible
