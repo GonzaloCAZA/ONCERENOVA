@@ -1,0 +1,28 @@
+# Dependencias
+frontend-v3\node_modulesgit 
+node_modules/
+backend-v3\.env
+# Archivos de entorno / claves privadas
+.env
+.env.local
+.env.development
+.env.production
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Builds
+dist/
+build/
+
+# Sistema
+.DS_Store
+Thumbs.db
+
+# IDEs
+.vscode/
+.idea/

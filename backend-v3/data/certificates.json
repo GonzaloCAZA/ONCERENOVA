@@ -1,0 +1,52 @@
+[
+  {
+    "txid": "84d6e45aca73aeb04944ca4556b03e8cf0886410568c2d113b0755983676861b",
+    "encryptionKey": "8f5ff6c0432eef947e8e6d1df28a097a7f89e696bcdf82f4efbfa142f40c6961590d1f8022a0e46ebed3bd2fc931e7be",
+    "timestamp": 1764499472961,
+    "preview": {
+      "disabilityType": "psiquica",
+      "percentage": 33,
+      "createdAt": "2025-11-30T10:44:32.961Z"
+    }
+  },
+  {
+    "txid": "7bfb68e1632ce4df33eb9fd6f1abfd24c95f558e42a08d670d8f190a7233ded7",
+    "encryptionKey": "3f31cff6bd3ea4289828bcb25b308c5ea11c648c4ba96f03a31bc925876ae037134efd7be213220bd563c0b8aa03bd64",
+    "timestamp": 1764500393584,
+    "preview": {
+      "disabilityType": "sensorial",
+      "percentage": 33,
+      "createdAt": "2025-11-30T10:59:53.584Z"
+    }
+  },
+  {
+    "txid": "e6e6c3ca4d98e546ae0ec5d70ec760fc210ba4932255b03969169e060ba7c4c2",
+    "encryptionKey": "982a95c4ce0fcca806c94fd6efbedb3d03d245a42f07d28361713642fa2ea99d780e95ef3ccfc33958dbc313a1d282ef",
+    "timestamp": 1764503087843,
+    "preview": {
+      "disabilityType": "fisica",
+      "percentage": 33,
+      "createdAt": "2025-11-30T11:44:47.843Z"
+    }
+  },
+  {
+    "txid": "cb8821806d9e273fcd28dd91b0ee317f74e9ebf5efd1044f5e83c7ea28a2980d",
+    "encryptionKey": "e9275f8224e20ad02b2242c8f55a8c50a483465a7bd4b5fe58a1c75a0eb47c80caf3fbb30d635dff8fb698839990f8ca",
+    "timestamp": 1764504179824,
+    "preview": {
+      "disabilityType": "sensorial",
+      "percentage": 100,
+      "createdAt": "2025-11-30T12:02:59.824Z"
+    }
+  },
+  {
+    "txid": "1247830cfc3d7204f05b9c2cf7e524d18d2e5d5a1443aa3a35552681d9621ac9",
+    "encryptionKey": "a1caed7b5f3c81d5c78ce4a3687089a8e88d2f3ff97b54883077572663f1a07bb8e6a499d7d21fd29e1e87b41b1475ca",
+    "timestamp": 1764505040758,
+    "preview": {
+      "disabilityType": "cognitiva",
+      "percentage": 33,
+      "createdAt": "2025-11-30T12:17:20.758Z"
+    }
+  }
+]
